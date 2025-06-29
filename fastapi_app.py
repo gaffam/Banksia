@@ -21,7 +21,10 @@ from collector.logging_config import setup_logging
 from risk_analyzer import add_risk_column
 
 from services.legacy_harmony import start_guardian
-main
+
+
+from services.legacy_harmony import start_guardian
+main 
 
 DB_PATH = Path(os.getenv("WEATHER_DB", "weather.db"))
 API_KEY = os.getenv("API_KEY")
@@ -41,7 +44,11 @@ async def lifespan(app: FastAPI):
 
     start_guardian()
 
+
+    start_guardian()
+
  main
+
     yield
 
 app = FastAPI(title="Banksia API", lifespan=lifespan)
