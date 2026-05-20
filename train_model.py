@@ -1,7 +1,7 @@
 import os
-import pandas as pd
 from pathlib import Path
-from collector import sqlite_storage, timescale_storage
+
+from collector import sqlite_storage
 from risk_analyzer import (
     train_random_forest,
     tune_random_forest,
@@ -10,8 +10,8 @@ from risk_analyzer import (
 )
 
 DB_PATH = Path(os.getenv("WEATHER_DB", "weather.db"))
-DB_URL = os.getenv("TIMESCALE_URL")
 MODEL_PATH = Path("models/model.joblib")
+
 
 def main() -> None:
     import argparse
@@ -29,11 +29,8 @@ def main() -> None:
 
     limit = None if args.limit == 0 else args.limit
 
-    if DB_URL:
-        df = timescale_storage.query_range_ts(DB_URL, limit=limit)
-    else:
-        sqlite_storage.init_db(DB_PATH)
-        df = sqlite_storage.query_latest(DB_PATH, limit=limit)
+    sqlite_storage.init_db(DB_PATH)
+    df = sqlite_storage.query_latest(DB_PATH, limit=limit)
 
     df = add_risk_column(df)
     if args.tune:
@@ -43,6 +40,7 @@ def main() -> None:
 
     MODEL_PATH.parent.mkdir(exist_ok=True)
     save_model(model, MODEL_PATH)
+
 
 if __name__ == "__main__":
     main()

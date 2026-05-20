@@ -6,12 +6,18 @@ createApp({
       data: [],
       limit: 100,
       chart: null,
+      apiKey: 'dev-key-1',
     };
   },
   methods: {
     async loadData() {
       try {
-        const resp = await fetch(`/api/latest-data?limit=${this.limit}`);
+        const resp = await fetch(`/api/weather/latest?limit=${this.limit}`, {
+          headers: { 'x-api-key': this.apiKey }
+        });
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
         const arr = await resp.json();
         this.data = arr;
         this.drawChart();
