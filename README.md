@@ -1,61 +1,35 @@
 # Banksia
 
-Banksia is an open-source toolkit for gathering meteorological data and estimating wildfire risk. The project fetches hourly weather observations from Turkey's State Meteorological Service (MGM) and stores them in a local or remote database. A FastAPI backend exposes recent records and statistics, while an optional Vue dashboard visualizes the data.
+Banksia, ilçe bazlı yangın riskini hava durumu + uydu sıcak nokta verisiyle izlemek için tasarlanmış bir FastAPI servisidir.
 
-## Features
+## Ne işe yarar?
+- İlçe bazlı son ölçümleri döner.
+- Tarih aralığında geçmiş veriyi filtreler.
+- Basit risk skoru üretir.
+- Canlı panel ve websocket üzerinden en güncel veriyi yayınlar.
 
-- **Data Collection** from the MGM API with retry logic
-- **Storage Options:** SQLite by default, with optional PostgreSQL/TimescaleDB and InfluxDB support
-- **API Service** providing JSON endpoints, WebSocket streaming, and Prometheus metrics
-- **Frontend Dashboard** built with Vue and Chart.js
-- **Kafka Streaming** utilities for real-time pipelines
-- **Risk Analysis** helpers and machine-learning model training via `risk_analyzer.py`
-- **Docker** image and Kubernetes manifests for deployment
+## Neye iyi değil?
+- Üretim-grade FWI implementasyonu henüz yok.
+- MGM/FIRMS kaynakları adapter + fallback yapısına tam geçirilmedi.
+- PostgreSQL/PostGIS varsayılan değil (geçiş planı gerekiyor).
 
-## Quick Start
-
-1. Install dependencies:
-   ```bash
-   python -m pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
-2. Collect data:
-   ```bash
-   python data_collector.py --output weather_data.json
-   ```
-3. Run the API server:
-   ```bash
-   uvicorn fastapi_app:app --reload
-   ```
-4. Open `http://localhost:8000/dashboard/` to view the dashboard.
-
-## Tests
-
-Run the full test suite with:
+## 3 komutta çalıştır
 ```bash
-pytest -q
+cp .env.example .env
+pip install -r requirements.txt
+uvicorn fastapi_app:app --host 0.0.0.0 --port 8000
 ```
 
-## Docker
+Ardından:
+- API docs: `http://localhost:8000/docs`
+- Dashboard: `http://localhost:8000/dashboard`
 
-Build and start the service using Docker:
-```bash
-docker build -t banksia .
-docker run -p 8000:8000 banksia
-```
+## API Özeti
+- `GET /api/weather/latest`
+- `GET /api/weather/range`
+- `GET /api/weather/risk`
+- `GET /api/weather/statistics`
+- `GET /ws/weather`
 
-## Kubernetes
-
-Deployment manifests reside in `k8s/`. Apply them in order:
-```bash
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/secret.yaml
-kubectl apply -f k8s/pvc.yaml
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-kubectl apply -f k8s/hpa.yaml
-```
-
-## License
-
-This project is released under the terms of the F.U.C.K. License. See the [LICENSE](LICENSE) file for details.
+Header auth için:
+- `x-api-key: <API_KEYS içindeki key>`
